@@ -3,6 +3,10 @@
 
 # pcg2
 
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
+[![Travis build
+status](https://travis-ci.org/natbprice/pcg2.svg?branch=master)](https://travis-ci.org/natbprice/pcg2)
+
 There are several R packages that implement the preconditioned conjugate
 gradients (pcg) method, but none of them allow for the passage of a
 function handle in place of the matrix vector products A\*x. This
