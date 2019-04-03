@@ -1,13 +1,13 @@
 ---
 output:
-  github_document:
-    pandoc_args: --webtex
+  github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r setup, include = FALSE}
 library(knitr)
+library(pcg2)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -27,87 +27,44 @@ local({
 })
 ```
 
-# tvdiff
+# pcg2
 
-[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Travis build status](https://travis-ci.org/natbprice/tvdiff.svg?branch=master)](https://travis-ci.org/natbprice/tvdiff)
+There are several R packages that implement the preconditioned conjugate 
+gradients (pcg) method, but none of them allow for the passage of a function handle
+in place of the matrix vector products A\*x. This functionality is available in Matlab
+via the [`pcg`](https://www.mathworks.com/help/matlab/ref/pcg.html) function
+and in Python via the [`scipy.sparse.linalg.cg`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.cg.html) and [`scipy.sparse.linalg.LinearOperator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html) functions. This package is a simple implementation
+of the pcg method allowing the user to pass a function handle in place of the 
+matrix vector product A\*x.
 
-The **tvdiff** package is an R translation of the Matlab implementation of the 
-Total Variation Regularized Numerical Differentiation algorithm by Rick Chartrand.
-The package implements the methods found in Rick Chartrand,"Numerical 
-differentiation of noisy, nonsmooth data," ISRN Applied Mathematics, Vol. 2011,
-Article ID 164564, 2011.
+Other pcg packages in R:
+
+* [pcg](https://cran.r-project.org/package=pcg)
+* [Rlinsolve](https://cran.r-project.org/package=Rlinsolve)
+* [cPCG](https://cran.r-project.org/package=cPCG)
+
 
 ## Installation
 
-The **tvdiff** package is currently only available from Github.
+The **pcg2** package is currently only available from Github.
 
 ```{r, eval = FALSE}
-devtools::install_github("natbprice/tvdiff")
+devtools::install_github("natbprice/pcg2")
 ```
 
 ## Example
-A simple example based on the function $f(x) = \mid x - 0.5 \mid$ with 
-Gaussian noise of standard deviation 0.05. The derivative is estimated from the 
-noisy observations using Total Variation Regularized Differentiation. A
-prediction of the original function is obtained from the estimated derivative 
-through numerical integration.
 
-```{r, echo = FALSE, message = FALSE, warning = FALSE, dev = 'svg', fig.height=3, fig.width=6}
-library(tvdiff)
-library(tidyr)
-library(dplyr)
-library(ggplot2)
+```{r}
+A <- matrix(c(4, 1, 1, 3), nrow = 2)
+b <- c(1, 2)
+x0 <- c(2, 1)
 
-# Load demo data
-data("smalldemodata")
+Ax <- function(x) {
+  A %*% x
+}
 
-# Build dataframe
-smallEx <-
-  smalldemodata %>%
-  # Estimate derivative
-  mutate(dxdt =
-           TVRegDiffR(
-             data = obs,
-             iter = 1e3,
-             alph = 0.2,
-             scale = "small",
-             ep = 1e-6,
-             dx = 0.01
-           )[-1]) %>% 
-  # Simple numerical integration
-  mutate(dx = lead(x) - x,
-         pred = obs[1] + cumsum(dxdt*dx),
-         true = abs(x - 0.5)) %>% 
-  # Collect in long form
-  gather(key, value, -x, -dx)
+M <- matrix(c(4, 0, 0, 3), nrow = nrow(A))
 
-# Plot observed vs predicted
-ggplot(smallEx %>% 
-         filter(key != "dxdt"), 
-       aes(x = x, y = value, color = key, linetype = key)) +
-  geom_line() +
-  theme_minimal() +
-  theme(legend.title = element_blank(),
-        legend.position = "bottom") +
-  labs(x = "x",
-       y = "f(x)")
-
-# Plot derivative
-ggplot(smallEx %>% 
-         filter(key == "dxdt"), 
-       aes(x = x, y = value)) +
-  geom_point() +
-  theme_minimal() +
-  labs(x = "x",
-       y = "f'(x)")
+pcg(Ax, b, M, x0)
 ```
 
-
-## References
-Rick Chartrand, "Numerical differentiation of noisy, nonsmooth data," ISRN Applied Mathematics, Vol. 2011, Article ID 164564, 2011.
-
-https://sites.google.com/site/dnartrahckcir/home/tvdiff-code
-
-Python translation by Simone Sturniolo:
-https://github.com/stur86/tvregdiff

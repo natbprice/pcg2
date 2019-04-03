@@ -1,25 +1,19 @@
-Package: tvdiff
+Package: pcg2
 Type: Package
-Title: Numerical differentiation of noisy, nonsmooth data
+Title: Preconditioned conjugate gradients method
 Version: 0.0.9000
 Authors@R: c(
     person("Nathaniel", "Price", email = "natbprice@gmail.com", role = c("aut", "cre"),
-    comment= c(ORCID = "0000-0002-6450-617X")),
-    person("Jessica", "Burnett", email = "jessicaleighburnett@gmail.com", role = c("aut"))
+    comment= c(ORCID = "0000-0002-6450-617X"))
     )
-Description: Numerical differentiation of noisy, nonsmooth data based on 
-    Total Variation Regularized Numerical Differentiation algorithm by Rick Chartrand.
+Description: Preconditioned conjugate gradients method with ability to pass
+    function handle in place of matrix vector products A*x.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
     knitr,
-    rmarkdown,
-    reticulate,
-    tidyr,
-    dplyr,
-    purrr,
-    ggplot2
+    rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
 Imports:

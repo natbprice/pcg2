@@ -1,45 +1,57 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# tvdiff
+# pcg2
 
-[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Travis build
-status](https://travis-ci.org/natbprice/tvdiff.svg?branch=master)](https://travis-ci.org/natbprice/tvdiff)
+There are several R packages that implement the preconditioned conjugate
+gradients (pcg) method, but none of them allow for the passage of a
+function handle in place of the matrix vector products A\*x. This
+functionality is available in Matlab via the
+[`pcg`](https://www.mathworks.com/help/matlab/ref/pcg.html) function and
+in Python via the
+[`scipy.sparse.linalg.cg`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.cg.html)
+and
+[`scipy.sparse.linalg.LinearOperator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html)
+functions. This package is a simple implementation of the pcg method
+allowing the user to pass a function handle in place of the matrix
+vector product A\*x.
 
-The **tvdiff** package is an R translation of the Matlab implementation
-of the Total Variation Regularized Numerical Differentiation algorithm
-by Rick Chartrand. The package implements the methods found in Rick
-Chartrand,“Numerical differentiation of noisy, nonsmooth data,” ISRN
-Applied Mathematics, Vol. 2011, Article ID 164564, 2011.
+Other pcg packages in R:
+
+  - [pcg](https://cran.r-project.org/package=pcg)
+  - [Rlinsolve](https://cran.r-project.org/package=Rlinsolve)
+  - [cPCG](https://cran.r-project.org/package=cPCG)
 
 ## Installation
 
-The **tvdiff** package is currently only available from Github.
+The **pcg2** package is currently only available from Github.
 
 ``` r
-devtools::install_github("natbprice/tvdiff")
+devtools::install_github("natbprice/pcg2")
 ```
 
 ## Example
 
-A simple example based on the function ![f(x) = \\mid x - 0.5
-\\mid](https://latex.codecogs.com/png.latex?f%28x%29%20%3D%20%5Cmid%20x%20-%200.5%20%5Cmid
-"f(x) = \\mid x - 0.5 \\mid") with Gaussian noise of standard deviation
-0.05. The derivative is estimated from the noisy observations using
-Total Variation Regularized Differentiation. A prediction of the
-original function is obtained from the estimated derivative through
-numerical
-integration.
+``` r
+A <- matrix(c(4, 1, 1, 3), nrow = 2)
+b <- c(1, 2)
+x0 <- c(2, 1)
 
-<img src= "./man/figures/README-unnamed-chunk-2-1.svg"><img src= "./man/figures/README-unnamed-chunk-2-2.svg">
+Ax <- function(x) {
+  A %*% x
+}
 
-## References
+M <- matrix(c(4, 0, 0, 3), nrow = nrow(A))
 
-Rick Chartrand, “Numerical differentiation of noisy, nonsmooth data,”
-ISRN Applied Mathematics, Vol. 2011, Article ID 164564, 2011.
-
-<https://sites.google.com/site/dnartrahckcir/home/tvdiff-code>
-
-Python translation by Simone Sturniolo:
-<https://github.com/stur86/tvregdiff>
+pcg(Ax, b, M, x0)
+#> $x
+#>            [,1]
+#> [1,] 0.09090909
+#> [2,] 0.63636364
+#> 
+#> $resid
+#> [1] 2.220446e-16
+#> 
+#> $iter
+#> [1] 3
+```
